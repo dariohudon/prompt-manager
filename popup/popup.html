@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Prompt Manager</title>
+  <link rel="stylesheet" href="popup.css" />
+</head>
+<body>
+  <div class="app">
+    <!-- Header -->
+    <header class="header">
+      <div class="header-left">
+        <svg class="logo-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/>
+          <rect x="9" y="3" width="6" height="4" rx="1"/>
+          <path d="M9 12h6M9 16h4"/>
+        </svg>
+        <span class="logo-text">Prompt Manager</span>
+      </div>
+      <button class="btn-icon" id="btn-settings" title="Settings">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="3"/>
+          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+        </svg>
+      </button>
+    </header>
+
+    <!-- Main View -->
+    <div id="view-main" class="view active">
+      <!-- Search -->
+      <div class="search-wrap">
+        <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+        </svg>
+        <input type="text" id="search-input" class="search-input" placeholder="Search prompts..." />
+        <button class="btn-clear-search hidden" id="btn-clear-search">&times;</button>
+      </div>
+
+      <!-- Folder list -->
+      <div class="section-header">
+        <span>Clients / Folders</span>
+        <button class="btn-text" id="btn-add-folder">+ Add</button>
+      </div>
+      <div id="folder-list" class="folder-list"></div>
+
+      <!-- Search results -->
+      <div id="search-results" class="search-results hidden"></div>
+
+      <!-- Empty state -->
+      <div id="empty-state" class="empty-state hidden">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M3 7v10a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-6l-2-2H5a2 2 0 0 0-2 2z"/>
+        </svg>
+        <p>No clients yet.</p>
+        <p class="empty-sub">Click "+ Add" to create your first client folder.</p>
+      </div>
+    </div>
+
+    <!-- Add/Edit Folder Modal -->
+    <div id="view-folder-form" class="view modal-view">
+      <div class="modal-header">
+        <button class="btn-back" id="btn-folder-back">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M19 12H5M12 19l-7-7 7-7"/>
+          </svg>
+        </button>
+        <span id="folder-form-title">New Client</span>
+      </div>
+      <div class="modal-body">
+        <label class="field-label">Client / Folder Name</label>
+        <input type="text" id="folder-name-input" class="text-input" placeholder="e.g. Acme Corp" />
+        <div class="form-actions">
+          <button class="btn-secondary" id="btn-folder-cancel">Cancel</button>
+          <button class="btn-primary" id="btn-folder-save">Save</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Folder Detail View (prompts list) -->
+    <div id="view-folder-detail" class="view modal-view">
+      <div class="modal-header">
+        <button class="btn-back" id="btn-detail-back">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M19 12H5M12 19l-7-7 7-7"/>
+          </svg>
+        </button>
+        <span id="detail-folder-name">Client Name</span>
+        <div class="header-actions">
+          <button class="btn-icon" id="btn-edit-folder" title="Edit folder">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+              <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+            </svg>
+          </button>
+          <button class="btn-icon btn-danger" id="btn-delete-folder" title="Delete folder">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
+              <path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+      <div id="prompt-list" class="prompt-list"></div>
+      <div id="prompt-empty" class="empty-state hidden">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/>
+          <rect x="9" y="3" width="6" height="4" rx="1"/>
+        </svg>
+        <p>No prompts yet.</p>
+        <p class="empty-sub">Click "+ Add Prompt" below.</p>
+      </div>
+      <div class="bottom-bar">
+        <button class="btn-primary full-width" id="btn-add-prompt">+ Add Prompt</button>
+      </div>
+    </div>
+
+    <!-- Add/Edit Prompt View -->
+    <div id="view-prompt-form" class="view modal-view">
+      <div class="modal-header">
+        <button class="btn-back" id="btn-prompt-back">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M19 12H5M12 19l-7-7 7-7"/>
+          </svg>
+        </button>
+        <span id="prompt-form-title">New Prompt</span>
+      </div>
+      <div class="modal-body grow">
+        <label class="field-label">Title</label>
+        <input type="text" id="prompt-title-input" class="text-input" placeholder="e.g. Weekly Report Draft" />
+        <label class="field-label">Prompt Text</label>
+        <textarea id="prompt-text-input" class="text-area" placeholder="Enter your full prompt here..."></textarea>
+        <div class="form-actions">
+          <button class="btn-secondary" id="btn-prompt-cancel">Cancel</button>
+          <button class="btn-primary" id="btn-prompt-save">Save</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Toast notification -->
+    <div id="toast" class="toast hidden"></div>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>
